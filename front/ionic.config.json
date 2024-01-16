@@ -1,0 +1,7 @@
+{
+  "name": "Connect",
+  "integrations": {
+    "capacitor": {}
+  },
+  "type": "react-vite"
+}

@@ -54,6 +54,7 @@ export class AuthService {
     if (hash !== user.hash) {
       throw new UnauthorizedException();
     }
+
     const accessToken = await this.jwtService.signAsync({
       id: user.id,
       number: user.number,

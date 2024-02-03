@@ -13,7 +13,9 @@ import { UpdateUserBodyDto } from './dto';
 
 @Injectable()
 export class UsersService {
-  constructor(private readonly db: DbService) {}
+  constructor(private readonly db: DbService) {
+    // this.db.user.findMany().then((res) => console.log(res));
+  }
 
   findByNumber(number: string) {
     return this.db.user.findFirst({ where: { number } });

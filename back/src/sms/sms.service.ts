@@ -14,16 +14,16 @@ export class SmsService {
   ) {}
 
   async sendSMSNotification(to: string, msg: string): Promise<void> {
-    const code = await this.usersService.createUser(to);
-    await this.smsRu.sendSms({ to, msg: `${msg} ${code}` });
+    // const code = await this.usersService.createUser(to);
+    await this.smsRu.sendSms({ to, msg: msg });
   }
 
   async verifyCode({ code, number }: VerifyCodeBodyDto): Promise<boolean> {
     const user = await this.db.user.findFirst({ where: { number } });
 
-    if (user.code === code) {
-      this.usersService.updateUser({ number, role: Role.USER, code: 0 });
-    }
+    // if (user.code === code) {
+    //   this.usersService.updateUser({ number, role: Role.USER, code: 0 });
+    // }
     return user.code === code;
   }
 }

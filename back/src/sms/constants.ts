@@ -1,1 +1,1 @@
-export const SEND_MESSAGE = 'Никому не сообщайте код';
+export const SEND_MESSAGE = 'Ух сладкий, может займеся сексом ?';

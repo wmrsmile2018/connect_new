@@ -27,11 +27,11 @@ function ViewMessage() {
   });
 
   return (
-    <IonPage id="view-message-page">
+    <IonPage id='view-message-page'>
       <IonHeader translucent>
         <IonToolbar>
-          <IonButtons slot="start">
-            <IonBackButton text="Inbox" defaultHref="/home"></IonBackButton>
+          <IonButtons slot='start'>
+            <IonBackButton text='Inbox' defaultHref='/home'></IonBackButton>
           </IonButtons>
         </IonToolbar>
       </IonHeader>
@@ -40,11 +40,15 @@ function ViewMessage() {
         {message ? (
           <>
             <IonItem>
-              <IonIcon aria-hidden="true" icon={personCircle} color="primary"></IonIcon>
-              <IonLabel className="ion-text-wrap">
+              <IonIcon
+                aria-hidden='true'
+                icon={personCircle}
+                color='primary'
+              ></IonIcon>
+              <IonLabel className='ion-text-wrap'>
                 <h2>
                   {message.fromName}
-                  <span className="date">
+                  <span className='date'>
                     <IonNote>{message.date}</IonNote>
                   </span>
                 </h2>
@@ -54,7 +58,7 @@ function ViewMessage() {
               </IonLabel>
             </IonItem>
 
-            <div className="ion-padding">
+            <div className='ion-padding'>
               <h1>{message.subject}</h1>
               <p>
                 Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do

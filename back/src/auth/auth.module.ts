@@ -5,18 +5,32 @@ import { AuthController } from './auth.controller';
 import { DbModule } from 'src/db/db.module';
 import { CookieService } from './cookie.service';
 import { JwtModule } from '@nestjs/jwt';
-import { ConfigModule } from '@nestjs/config';
+import { ConfigModule, ConfigService } from '@nestjs/config';
+import { SmsModule } from 'src/sms/sms.module';
+import { SmsService } from 'src/sms/sms.service';
+import { UsersService } from 'src/users/users.service';
 
 @Module({
-  providers: [AuthService, PasswordService, CookieService],
+  providers: [
+    AuthService,
+    PasswordService,
+    CookieService,
+    SmsService,
+    UsersService,
+  ],
   controllers: [AuthController],
   imports: [
     DbModule,
     ConfigModule,
-    JwtModule.register({
+    SmsModule,
+    JwtModule.registerAsync({
       global: true,
-      secret: process.env.JWT_SECRET,
-      signOptions: { expiresIn: '1d' },
+      imports: [ConfigModule],
+      useFactory: (configService: ConfigService) => ({
+        secret: configService.get('JWT_SECRET'),
+        signOptions: { expiresIn: '1d' },
+      }),
+      inject: [ConfigService],
     }),
   ],
 })

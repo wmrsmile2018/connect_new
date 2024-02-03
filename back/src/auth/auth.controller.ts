@@ -30,7 +30,7 @@ export class AuthController {
     @Res({ passthrough: true }) res: Response,
   ) {
     const { accessToken } = await this.authService.signUp(
-      body.email,
+      body.number,
       body.password,
     );
 

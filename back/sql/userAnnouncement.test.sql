@@ -1,0 +1,1 @@
+insert into "userAnnouncement" ("announcementId", "userId", "timeZone", location) values (1, 2, 'timeZone', 'location');

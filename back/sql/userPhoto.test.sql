@@ -1,0 +1,1 @@
+insert into "userPhoto" ("userId", "photoId", "timeZone", location) values (1, 1, 'timeZone', 'location');

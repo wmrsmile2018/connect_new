@@ -10,28 +10,172 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-
-model User {
-  id String @id @unique @default(uuid())
-  code Int
-  number String
-  createDateTime String
-  profile Profile?
-  role Role
-  hash String
-  salt String
+// Справочные таблицы
+model role {
+  id          Int     @id @unique @default(autoincrement())
+  title       String
+  description String?
+  code        String  @unique
+  User        user[]
 }
 
-model Profile {
-  id String @id @unique @default(uuid())
-  userId String @unique
-  name String @unique
-  email String @unique
-  user User @relation(fields: [userId], references: [id])
+model priority {
+  id          Int     @id @unique @default(autoincrement())
+  title       String
+  description String?
+  code        String  @unique
+  user        user[]
 }
 
-enum Role {
-  SUPER_USER
-  USER
-  NEW
+model linkType {
+  id           Int            @id @unique @default(autoincrement())
+  code         String         @unique
+  description  String?
+  rootUrl      String
+  userLinkType userLinkType[]
+}
+
+model filter {
+  id          Int          @id @unique @default(autoincrement())
+  code        String       @unique
+  title       String
+  description String?
+  userFilter  userFilter[]
+}
+
+// Таблицы фактов
+model userFilter {
+  id                 Int      @id @default(autoincrement())
+  user               user     @relation(fields: [userId], references: [id])
+  userId             Int
+  filter             filter   @relation(fields: [filterCode], references: [code])
+  filterCode         String
+  dateTimeOfCreation DateTime @default(now())
+  timeZone           String
+  location           String
+
+  @@unique([filterCode, userId])
+}
+
+model userLinkType {
+  id                 Int      @id @default(autoincrement())
+  user               user     @relation(fields: [userId], references: [id])
+  userId             Int
+  linkType           linkType @relation(fields: [linkTypeCode], references: [code])
+  linkTypeCode       String
+  dateTimeOfCreation DateTime @default(now())
+  timeZone           String
+  location           String
+  idProfile          String
+
+  @@unique([userId, linkTypeCode])
+}
+
+model favorite {
+  id                 Int      @id @unique @default(autoincrement())
+  userSrc            user     @relation("userSrc", fields: [userSrcId], references: [id])
+  userSrcId          Int
+  userTrg            user     @relation("userTrg", fields: [userTrgId], references: [id])
+  userTrgId          Int
+  dateTimeOfCreation DateTime @default(now())
+  timeZone           String
+  location           String
+}
+
+model userAnnouncement {
+  id                 Int          @id @default(autoincrement())
+  announcement       announcement @relation(fields: [announcementId], references: [id])
+  announcementId     Int
+  user               user         @relation(fields: [userId], references: [id])
+  userId             Int
+  dateTimeOfCreation DateTime     @default(now())
+  timeZone           String
+  location           String
+}
+
+model announcementPhoto {
+  id                 Int          @id @default(autoincrement())
+  announcement       announcement @relation(fields: [announcementId], references: [id])
+  announcementId     Int
+  photo              photo        @relation(fields: [photoId], references: [id])
+  photoId            Int          @unique
+  dateTimeOfCreation DateTime     @default(now())
+  timeZone           String
+  location           String
+}
+
+model userPhoto {
+  id                 Int      @id @default(autoincrement())
+  user               user     @relation(fields: [userId], references: [id])
+  userId             Int
+  photo              photo    @relation(fields: [photoId], references: [id])
+  photoId            Int      @unique
+  dateTimeOfCreation DateTime @default(now())
+  timeZone           String
+  location           String
+}
+
+model markedCard {
+  id                 Int      @id @unique @default(autoincrement())
+  user               user     @relation(fields: [userId], references: [id])
+  userId             Int
+  deadline           DateTime
+  dateTimeOfCreation DateTime @default(now())
+  timeZone           String
+  location           String
+  isMarked           Boolean
+}
+
+// Таблицы сущностей
+model user {
+  id                 Int       @id @unique @default(autoincrement())
+  role               role      @relation(fields: [roleCode], references: [code])
+  roleCode           String
+  priority           priority? @relation(fields: [priorityCode], references: [code])
+  priorityCode       String
+  code               Int
+  hash               String
+  salt               String
+  phone              String    @unique
+  dateTimeOfCreation DateTime  @default(now())
+
+  email            String?            @unique
+  firstName        String?
+  surname          String?
+  patronymic       String?
+  avatar           Int?
+  timeZone         String?
+  location         String?
+  updateDateTime   DateTime?
+  address          String?
+  jobTitle         String?
+  rating           Int?
+  description      String?
+  latitude         String?
+  longtitude       String?
+  favoriteSrc      favorite[]         @relation("userSrc")
+  favoriteTrg      favorite[]         @relation("userTrg")
+  userFilter       userFilter[]
+  userLinkType     userLinkType[]
+  userAnnouncement userAnnouncement[]
+  userPhoto        userPhoto[]
+  markedCard       markedCard[]
+}
+
+model photo {
+  id                Int                 @id @unique @default(autoincrement())
+  externalId        String
+  announcementPhoto announcementPhoto[]
+  userPhoto         userPhoto[]
+}
+
+model announcement {
+  id          Int      @id @unique @default(autoincrement())
+  description String
+  address     String
+  title       String
+  deadline    DateTime
+
+  userAnnouncement  userAnnouncement[]
+  announcementPhoto announcementPhoto[]
 }

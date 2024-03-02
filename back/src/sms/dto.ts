@@ -22,5 +22,5 @@ export class VerifyCodeBodyDto {
     example: '8(977)-388-16-86',
   })
   @IsNotEmpty()
-  number: string;
+  phone: string;
 }

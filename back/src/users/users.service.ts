@@ -1,6 +1,5 @@
 import { Injectable } from '@nestjs/common';
 import { DbService } from '../db/db.service';
-import { Role } from '@prisma/client';
 import { UpdateUserBodyDto } from './dto';
 
 // 1) пароль / логин
@@ -17,19 +16,24 @@ export class UsersService {
     // this.db.user.findMany().then((res) => console.log(res));
   }
 
-  findByNumber(number: string) {
-    return this.db.user.findFirst({ where: { number } });
+  findByNumber(phone: string) {
+    return this.db.user.findFirst({ where: { phone } });
   }
 
-  async create(number: string, hash: string, salt: string, code: number) {
+  async create(phone: string, hash: string, salt: string, code: number) {
+    const role = await this.db.role.findFirst({ where: { code: 'USER' } });
+    const priority = await this.db.priority.findFirst({
+      where: { code: 'MEDIUM' },
+    });
+
     const user = await this.db.user.create({
       data: {
-        number,
+        phone,
         hash,
         salt,
-        createDateTime: Date.now().toString(),
-        role: Role.NEW,
+        roleCode: role?.code,
         code,
+        priorityCode: priority?.code,
       },
     });
     // await this.accountService.create(user.id);
@@ -63,12 +67,12 @@ export class UsersService {
 
   async updateUser(data: UpdateUserBodyDto) {
     const user = await this.db.user.findFirst({
-      where: { number: data.number },
+      where: { phone: data.phone },
     });
 
     await this.db.user.update({
       where: { id: user.id },
-      data: { role: data.role, number: data.number, code: data.code },
+      data,
     });
   }
 }

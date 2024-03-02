@@ -20,22 +20,22 @@ export class AuthService {
     private readonly jwtService: JwtService,
   ) {}
 
-  async signUp(number: string, password: string) {
-    const user = await this.db.user.findFirst({ where: { number } });
+  async signUp(phone: string, password: string) {
+    const user = await this.db.user.findFirst({ where: { phone } });
     const code = Math.floor(Math.random() * 90000) + 10000;
     if (user) {
       throw new BadRequestException({ type: 'phone-exists' });
     }
 
-    this.smsService.sendSMSNotification(number, `${SEND_MESSAGE} ${code}`);
+    this.smsService.sendSMSNotification(phone, `${SEND_MESSAGE} ${code}`);
     const salt = this.passwordService.getSalt();
     const hash = this.passwordService.getHash(password, salt);
 
-    const newUser = await this.usersService.create(number, hash, salt, code);
+    const newUser = await this.usersService.create(phone, hash, salt, code);
 
     const accessToken = await this.jwtService.signAsync({
       id: newUser.id,
-      number: newUser.number,
+      phone: newUser.phone,
     });
     console.log('accessToken', accessToken);
 
@@ -57,7 +57,7 @@ export class AuthService {
 
     const accessToken = await this.jwtService.signAsync({
       id: user.id,
-      number: user.number,
+      phone: user.phone,
     });
 
     return { accessToken };

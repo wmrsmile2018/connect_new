@@ -3,7 +3,6 @@ import { SMSRu } from 'node-sms-ru';
 import { UsersService } from '../users/users.service';
 import { DbService } from 'src/db/db.service';
 import { VerifyCodeBodyDto } from './dto';
-import { Role } from '@prisma/client';
 
 @Injectable()
 export class SmsService {
@@ -18,8 +17,8 @@ export class SmsService {
     await this.smsRu.sendSms({ to, msg: msg });
   }
 
-  async verifyCode({ code, number }: VerifyCodeBodyDto): Promise<boolean> {
-    const user = await this.db.user.findFirst({ where: { number } });
+  async verifyCode({ code, phone }: VerifyCodeBodyDto): Promise<boolean> {
+    const user = await this.db.user.findFirst({ where: { phone } });
 
     // if (user.code === code) {
     //   this.usersService.updateUser({ number, role: Role.USER, code: 0 });

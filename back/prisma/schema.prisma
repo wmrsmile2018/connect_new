@@ -153,6 +153,7 @@ model user {
   description      String?
   latitude         String?
   longtitude       String?
+  
   favoriteSrc      favorite[]         @relation("userSrc")
   favoriteTrg      favorite[]         @relation("userTrg")
   userFilter       userFilter[]

@@ -9,7 +9,12 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { ApiCreatedResponse, ApiOkResponse } from '@nestjs/swagger';
-import { GetSessionInfoDto, SignInBodyDto, SignUpBodyDto } from './dto';
+import {
+  CheckNumberBodyDto,
+  GetSessionInfoDto,
+  SignInBodyDto,
+  SignUpBodyDto,
+} from './dto';
 import { AuthService } from './auth.service';
 import { CookieService } from './cookie.service';
 import { AuthGuard } from './auth.guard';
@@ -19,9 +24,16 @@ import { Response } from 'express';
 @Controller('auth')
 export class AuthController {
   constructor(
-    private authService: AuthService,
-    private cookieService: CookieService,
+    private readonly authService: AuthService,
+    private readonly cookieService: CookieService,
   ) {}
+
+  @Post('check-number')
+  @ApiCreatedResponse()
+  @HttpCode(HttpStatus.OK)
+  async checkNumber(@Body() body: CheckNumberBodyDto) {
+    this.authService.checkNumber(body.phone);
+  }
 
   @Post('sign-up')
   @ApiCreatedResponse()
@@ -30,7 +42,7 @@ export class AuthController {
     @Res({ passthrough: true }) res: Response,
   ) {
     const { accessToken } = await this.authService.signUp(
-      body.number,
+      body.phone,
       body.password,
     );
 
@@ -45,7 +57,7 @@ export class AuthController {
     @Res({ passthrough: true }) res: Response,
   ) {
     const { accessToken } = await this.authService.signIn(
-      body.number,
+      body.phone,
       body.password,
     );
 

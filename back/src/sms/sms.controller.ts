@@ -7,12 +7,6 @@ import { ApiOkResponse } from '@nestjs/swagger';
 export class SmsController {
   constructor(private readonly smsService: SmsService) {}
 
-  // @Post('send-sms')
-  // @ApiOkResponse()
-  // async sendSms(@Body() body: SendSmsBodyDto) {
-  //   this.smsService.sendSMSNotification(body.number, SEND_MESSAGE);
-  // }
-
   @Post('verify-code')
   @ApiOkResponse()
   async verifyCode(@Body() body: VerifyCodeBodyDto) {

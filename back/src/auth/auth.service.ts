@@ -1,5 +1,7 @@
 import {
   BadRequestException,
+  HttpException,
+  HttpStatus,
   Injectable,
   UnauthorizedException,
 } from '@nestjs/common';
@@ -7,8 +9,8 @@ import { DbService } from 'src/db/db.service';
 import { PasswordService } from './password.service';
 import { UsersService } from 'src/users/users.service';
 import { SmsService } from 'src/sms/sms.service';
-import { SEND_MESSAGE } from './constants';
 import { JwtService } from '@nestjs/jwt';
+import { SEND_MESSAGE } from './constants';
 
 @Injectable()
 export class AuthService {
@@ -20,18 +22,29 @@ export class AuthService {
     private readonly jwtService: JwtService,
   ) {}
 
+  async checkNumber(phone: string) {
+    const user = await this.db.user.findFirst({ where: { phone } });
+    if (user && user.hash) {
+      throw new HttpException(
+        `User with ${phone} number already exist`,
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+
+    const code = Math.floor(Math.random() * 90000) + 10000;
+    this.smsService.sendSMSNotification(phone, `${SEND_MESSAGE} ${code}`);
+    this.usersService.create(phone, code);
+  }
+
   async signUp(phone: string, password: string) {
     const user = await this.db.user.findFirst({ where: { phone } });
-    const code = Math.floor(Math.random() * 90000) + 10000;
     if (user) {
       throw new BadRequestException({ type: 'phone-exists' });
     }
-
-    this.smsService.sendSMSNotification(phone, `${SEND_MESSAGE} ${code}`);
     const salt = this.passwordService.getSalt();
     const hash = this.passwordService.getHash(password, salt);
 
-    const newUser = await this.usersService.create(phone, hash, salt, code);
+    const newUser = await this.usersService.setHashAndSalt(phone, hash, salt);
 
     const accessToken = await this.jwtService.signAsync({
       id: newUser.id,

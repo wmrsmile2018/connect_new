@@ -9,6 +9,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { SmsModule } from 'src/sms/sms.module';
 import { SmsService } from 'src/sms/sms.service';
 import { UsersService } from 'src/users/users.service';
+import { UsersModule } from 'src/users/users.module';
 
 @Module({
   providers: [
@@ -23,6 +24,7 @@ import { UsersService } from 'src/users/users.service';
     DbModule,
     ConfigModule,
     SmsModule,
+    UsersModule,
     JwtModule.registerAsync({
       global: true,
       imports: [ConfigModule],

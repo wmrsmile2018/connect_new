@@ -1,5 +1,13 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsEmail, IsNotEmpty } from 'class-validator';
+import { IsNotEmpty } from 'class-validator';
+
+export class CheckNumberBodyDto {
+  @ApiProperty({
+    example: '8(977)-388-16-86',
+  })
+  @IsNotEmpty()
+  phone: string;
+}
 
 export class SignUpBodyDto {
   // @ApiProperty({
@@ -12,7 +20,7 @@ export class SignUpBodyDto {
     example: '8(977)-388-16-86',
   })
   @IsNotEmpty()
-  number: string;
+  phone: string;
 
   @ApiProperty({
     example: '1234',
@@ -31,7 +39,7 @@ export class SignInBodyDto {
     example: '8(977)-388-16-86',
   })
   @IsNotEmpty()
-  number: string;
+  phone: string;
 
   @ApiProperty({
     example: '1234',

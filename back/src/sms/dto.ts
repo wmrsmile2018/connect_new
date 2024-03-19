@@ -3,7 +3,7 @@ import { IsNotEmpty, Max, Min } from 'class-validator';
 
 export class SendSmsBodyDto {
   @ApiProperty({
-    example: '8(977)-388-16-86',
+    example: '8(977)-388-1686',
   })
   @IsNotEmpty()
   number: string;
@@ -19,7 +19,7 @@ export class VerifyCodeBodyDto {
   code: number;
 
   @ApiProperty({
-    example: '8(977)-388-16-86',
+    example: '8(977)-388-1686',
   })
   @IsNotEmpty()
   phone: string;

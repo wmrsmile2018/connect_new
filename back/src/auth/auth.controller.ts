@@ -8,19 +8,21 @@ import {
   Res,
   UseGuards,
 } from '@nestjs/common';
-import { ApiCreatedResponse, ApiOkResponse } from '@nestjs/swagger';
+import { ApiCreatedResponse, ApiOkResponse, ApiTags } from '@nestjs/swagger';
 import {
   CheckNumberBodyDto,
   GetSessionInfoDto,
+  RefreshTokenBodyDto,
   SignInBodyDto,
   SignUpBodyDto,
 } from './dto';
 import { AuthService } from './auth.service';
 import { CookieService } from './cookie.service';
 import { AuthGuard } from './auth.guard';
-import { SessionInfo } from './session-info.decorator';
+import { SessionInfo } from './sessionInfo.decorator';
 import { Response } from 'express';
 
+@ApiTags('auth')
 @Controller('auth')
 export class AuthController {
   constructor(
@@ -32,21 +34,16 @@ export class AuthController {
   @ApiCreatedResponse()
   @HttpCode(HttpStatus.OK)
   async checkNumber(@Body() body: CheckNumberBodyDto) {
-    this.authService.checkNumber(body.phone);
+    return await this.authService.checkNumber(body.phone);
   }
 
   @Post('sign-up')
   @ApiCreatedResponse()
   async signUp(
     @Body() body: SignUpBodyDto,
-    @Res({ passthrough: true }) res: Response,
+    // @Res({ passthrough: true }) res: Response,
   ) {
-    const { accessToken } = await this.authService.signUp(
-      body.phone,
-      body.password,
-    );
-
-    this.cookieService.setToken(res, accessToken);
+    return await this.authService.signUp(body.phone, body.password);
   }
 
   @Post('sign-in')
@@ -56,12 +53,13 @@ export class AuthController {
     @Body() body: SignInBodyDto,
     @Res({ passthrough: true }) res: Response,
   ) {
-    const { accessToken } = await this.authService.signIn(
+    const { accessToken, refreshToken } = await this.authService.signIn(
       body.phone,
       body.password,
     );
 
     this.cookieService.setToken(res, accessToken);
+    return { accessToken, refreshToken };
   }
 
   @Post('sign-out')
@@ -79,5 +77,20 @@ export class AuthController {
   @UseGuards(AuthGuard)
   getSessionInfo(@SessionInfo() session: GetSessionInfoDto) {
     return session;
+  }
+
+  @Post('refresh-token')
+  @ApiOkResponse()
+  async refreshToken(
+    @Body() refreshTokenBodyDto: RefreshTokenBodyDto,
+    @Res({ passthrough: true })
+    res: Response,
+  ) {
+    const { accessToken, refreshToken } = await this.authService.refreshToken(
+      refreshTokenBodyDto.refreshToken,
+      refreshTokenBodyDto.userId,
+    );
+    this.cookieService.setToken(res, accessToken);
+    return { accessToken, refreshToken };
   }
 }

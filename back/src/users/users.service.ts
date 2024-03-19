@@ -1,14 +1,7 @@
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { DbService } from '../db/db.service';
-import { UpdateUserBodyDto } from './dto';
-
-// 1) пароль / логин
-// 2) смс
-// 3) подтверджение
-
-// 1) создать пользователя, сгенерировать код
-// 2) отправить смс
-// 3) сверить код
+import { UpdateProfileByIdBodyDto } from './dto';
+import { v4 as uuidv4 } from 'uuid';
 
 @Injectable()
 export class UsersService {
@@ -16,8 +9,38 @@ export class UsersService {
     // this.db.user.findMany().then((res) => console.log(res));
   }
 
+  findById(id: number) {
+    return this.db.user.findFirst({ where: { id } });
+  }
+
   findByNumber(phone: string) {
     return this.db.user.findFirst({ where: { phone } });
+  }
+
+  getUserMetadataById(userId: number) {
+    return this.db.userMetadata.findFirst({ where: { userId } });
+  }
+
+  async updateRefreshToken(userId: number) {
+    const refreshToken = uuidv4();
+    let userMetadata = await this.db.userMetadata.findFirst({
+      where: { userId },
+    });
+
+    if (!userMetadata) {
+      userMetadata = await this.db.userMetadata.create({
+        data: {
+          views: 0,
+          refreshToken,
+          userId,
+        },
+      });
+    }
+
+    return this.db.userMetadata.update({
+      where: { id: userMetadata.id },
+      data: { refreshToken, userId, views: 0 },
+    });
   }
 
   async create(phone: string, code: number) {
@@ -39,31 +62,23 @@ export class UsersService {
     return user;
   }
 
-  async setHashAndSalt(phone: string, hash: string, salt: string) {
+  async setUserCredentials(phone: string, hash: string, salt: string) {
     const user = await this.db.user.findFirst({ where: { phone } });
 
-    if (!user) {
-      throw new HttpException('incorrect phone number', HttpStatus.BAD_REQUEST);
+    if (!user || user.hash) {
+      throw new BadRequestException(
+        `The user with phone ${phone} already exist`,
+      );
     }
-
-    return await this.db.user.update({
+    return this.db.user.update({
       where: { phone },
       data: { salt, hash },
     });
   }
 
-  async updateUser(data: UpdateUserBodyDto) {
-    const user = await this.db.user.findFirst({
-      where: { phone: data.phone },
-    });
-
-    // Нужно ли тут проверять с токеном jwt из сессии ?
-    if (!user) {
-      throw new HttpException('incorrect phone number', HttpStatus.BAD_REQUEST);
-    }
-
-    await this.db.user.update({
-      where: { id: user.id },
+  async updateProfileById(id: number, data: UpdateProfileByIdBodyDto) {
+    return await this.db.user.update({
+      where: { id: id },
       data,
     });
   }

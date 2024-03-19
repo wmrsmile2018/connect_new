@@ -1,8 +1,9 @@
 import { Body, Controller, Post, UnauthorizedException } from '@nestjs/common';
 import { SmsService } from './sms.service';
 import { VerifyCodeBodyDto } from './dto';
-import { ApiOkResponse } from '@nestjs/swagger';
+import { ApiOkResponse, ApiTags } from '@nestjs/swagger';
 
+@ApiTags('sms')
 @Controller('sms')
 export class SmsController {
   constructor(private readonly smsService: SmsService) {}

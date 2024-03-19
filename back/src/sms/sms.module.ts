@@ -3,7 +3,6 @@ import { SmsService } from './sms.service';
 import { SMSRuModule } from 'node-sms-ru/nestjs';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { SmsController } from './sms.controller';
-import { UsersService } from 'src/users/users.service';
 import { DbService } from 'src/db/db.service';
 
 @Module({
@@ -18,7 +17,7 @@ import { DbService } from 'src/db/db.service';
     ConfigModule,
   ],
 
-  providers: [SmsService, UsersService, DbService],
+  providers: [SmsService, DbService],
 
   controllers: [SmsController],
 })

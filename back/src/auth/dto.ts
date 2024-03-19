@@ -3,7 +3,7 @@ import { IsNotEmpty } from 'class-validator';
 
 export class CheckNumberBodyDto {
   @ApiProperty({
-    example: '8(977)-388-16-86',
+    example: '8(977)-388-1686',
   })
   @IsNotEmpty()
   phone: string;
@@ -17,7 +17,7 @@ export class SignUpBodyDto {
   // email: string;
 
   @ApiProperty({
-    example: '8(977)-388-16-86',
+    example: '8(977)-388-1686',
   })
   @IsNotEmpty()
   phone: string;
@@ -36,7 +36,7 @@ export class SignInBodyDto {
   // @IsEmail()
   // email: string;
   @ApiProperty({
-    example: '8(977)-388-16-86',
+    example: '8(977)-388-1686',
   })
   @IsNotEmpty()
   phone: string;
@@ -59,4 +59,16 @@ export class GetSessionInfoDto {
   'iat': number;
   @ApiProperty()
   'exp': number;
+}
+
+export class RefreshTokenBodyDto {
+  @ApiProperty({
+    example: 1,
+  })
+  userId: number;
+
+  @ApiProperty({
+    example: 'asdasdad',
+  })
+  refreshToken: string;
 }

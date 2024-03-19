@@ -1,4 +1,4 @@
 export type AuthData = {
-  number: string;
+  phone: string;
   password: string;
 };

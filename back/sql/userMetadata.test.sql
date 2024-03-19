@@ -1,0 +1,1 @@
+insert into "userMetadata" ("userId", "refreshToken") values ('1', 'asdasdad');

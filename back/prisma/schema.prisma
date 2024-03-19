@@ -139,21 +139,21 @@ model user {
   phone              String    @unique
   dateTimeOfCreation DateTime  @default(now())
 
-  email            String?            @unique
-  firstName        String?
-  surname          String?
-  patronymic       String?
-  avatar           Int?
-  timeZone         String?
-  location         String?
-  updateDateTime   DateTime?
-  address          String?
-  jobTitle         String?
-  rating           Int?
-  description      String?
-  latitude         String?
-  longtitude       String?
-  
+  email          String?   @unique
+  firstName      String?
+  surname        String?
+  patronymic     String?
+  avatar         Int?
+  timeZone       String?
+  location       String?
+  updateDateTime DateTime?
+  address        String?
+  jobTitle       String?
+  rating         Int?
+  description    String?
+  latitude       String?
+  longtitude     String?
+
   favoriteSrc      favorite[]         @relation("userSrc")
   favoriteTrg      favorite[]         @relation("userTrg")
   userFilter       userFilter[]
@@ -161,6 +161,16 @@ model user {
   userAnnouncement userAnnouncement[]
   userPhoto        userPhoto[]
   markedCard       markedCard[]
+  userMetadata     userMetadata[]
+}
+
+model userMetadata {
+  id                    Int      @id @unique @default(autoincrement())
+  user                  user     @relation(fields: [userId], references: [id])
+  userId                Int      @unique
+  views                 Int?
+  refreshToken          String
+  tokenCreationDateTime DateTime @updatedAt
 }
 
 model photo {
@@ -177,6 +187,14 @@ model announcement {
   title       String
   deadline    DateTime
 
-  userAnnouncement  userAnnouncement[]
-  announcementPhoto announcementPhoto[]
+  userAnnouncement     userAnnouncement[]
+  announcementPhoto    announcementPhoto[]
+  announcementMetadata announcementMetadata[]
+}
+
+model announcementMetadata {
+  id             Int          @id @unique @default(autoincrement())
+  views          Int
+  announcement   announcement @relation(fields: [announcementId], references: [id])
+  announcementId Int
 }

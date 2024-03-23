@@ -1,21 +1,27 @@
 import {
   Body,
   Controller,
-  HttpStatus,
+  Get,
   Param,
   Patch,
+  Post,
   UseGuards,
 } from '@nestjs/common';
 import {
   ApiOkResponse,
   ApiOperation,
   ApiParam,
-  ApiResponse,
   ApiTags,
 } from '@nestjs/swagger';
 import { AuthGuard } from 'src/auth/auth.guard';
-import { UpdateProfileByIdBodyDto } from './dto';
+import {
+  GetUserListBodyDto,
+  MarkUserBodyDto,
+  UpdateProfileByIdBodyDto,
+} from './dto';
 import { UsersService } from 'src/users/users.service';
+import { SessionInfo } from 'src/session-info/session-info.decorator';
+import { GetSessionInfoDto } from 'src/session-info/dto';
 
 @UseGuards(AuthGuard)
 @ApiTags('users')
@@ -27,12 +33,51 @@ export class UsersController {
   @ApiOkResponse()
   @ApiOperation({ summary: 'Update profile data with user id' })
   @ApiParam({ name: 'id', required: true, description: 'user identifier' })
-  @ApiResponse({ status: HttpStatus.OK, description: 'Success', type: 'hello' })
-  @ApiResponse({ status: HttpStatus.BAD_REQUEST, description: 'Bad Request' })
   async updateProfileById(
     @Param('id') id: number,
     @Body() body: UpdateProfileByIdBodyDto,
   ) {
     return await this.usersService.updateProfileById(Number(id), body);
+  }
+
+  @Get('id/:id')
+  @ApiOkResponse()
+  @ApiParam({ name: 'id', required: true, description: 'user identifier' })
+  async getUserById(@Param('id') id: number) {
+    return await this.usersService.findById(id);
+  }
+  @Get('phone/:phone')
+  @ApiOkResponse()
+  @ApiParam({ name: 'phone', required: true, description: 'user phone' })
+  async getUserByPhone(@Param('phone') phone: string) {
+    return await this.usersService.findByNumber(phone);
+  }
+
+  @Post('list')
+  @ApiOkResponse()
+  async getUsers(@Body() pagination: GetUserListBodyDto) {
+    return await this.usersService.getUserList(
+      pagination.skip,
+      pagination.take,
+    );
+  }
+
+  @Post('mark-user')
+  @ApiOkResponse()
+  async markUser(
+    @Body() body: MarkUserBodyDto,
+    @SessionInfo() session: GetSessionInfoDto,
+  ) {
+    return await this.usersService.createMarkForUser({
+      ...session,
+      ...body,
+      id: session.sub,
+    });
+  }
+
+  @Get('/:id/is-marked')
+  @ApiOkResponse()
+  async isUserByIdMarked(@Param('id') id: number) {
+    return await this.usersService.isUserMarked(Number(id));
   }
 }

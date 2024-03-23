@@ -1,4 +1,22 @@
-import { ApiPropertyOptional } from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+
+export class MarkUserBodyDto {
+  @ApiProperty({
+    example: '1d',
+  })
+  durationCode: string;
+}
+
+export class GetUserListBodyDto {
+  @ApiPropertyOptional({
+    example: 5,
+  })
+  take?: number;
+  @ApiPropertyOptional({
+    example: 0,
+  })
+  skip?: number;
+}
 
 export class UpdateProfileByIdBodyDto {
   @ApiPropertyOptional({

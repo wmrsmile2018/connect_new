@@ -16,7 +16,6 @@ model duration {
   id         Int          @id @unique @default(autoincrement())
   code       String       @unique
   name       String
-  markedCard markedCard[]
 }
 
 model role {
@@ -148,8 +147,6 @@ model markedCard {
   dateTimeOfCreation DateTime  @default(now())
   timeZone           String
   location           String
-  duration           duration? @relation(fields: [durationId], references: [id])
-  durationId         Int?
 }
 
 model UserHistory {

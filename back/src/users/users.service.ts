@@ -1,24 +1,39 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  InternalServerErrorException,
+} from '@nestjs/common';
 import { DbService } from '../db/db.service';
 import { UpdateProfileByIdBodyDto } from './dto';
 import { v4 as uuidv4 } from 'uuid';
+import * as dayjs from 'dayjs';
+import { DURATION_MAP } from './constants';
 
 @Injectable()
 export class UsersService {
   constructor(private readonly db: DbService) {
-    // this.db.user.findMany().then((res) => console.log(res));
+    // console.log(dayjs('day', undefined).add(1, 'd'));
+    console.log('asdasd', dayjs('2024-03-22 01:29:55.284').diff(Date.now()));
+    console.log('asdasd', dayjs(Date.now()).diff('2024-03-22 01:29:55.284'));
   }
 
-  findById(id: number) {
-    return this.db.user.findFirst({ where: { id } });
+  async findById(id: number) {
+    return this.db.user.findFirst({ where: { id: Number(id) } });
   }
 
-  findByNumber(phone: string) {
+  async findByNumber(phone: string) {
     return this.db.user.findFirst({ where: { phone } });
   }
 
-  getUserMetadataById(userId: number) {
+  async getUserMetadataById(userId: number) {
     return this.db.userMetadata.findFirst({ where: { userId } });
+  }
+
+  async getUserList(skip: number, take: number) {
+    return this.db.user.findMany({
+      take,
+      skip,
+    });
   }
 
   async updateRefreshToken(userId: number) {
@@ -26,6 +41,12 @@ export class UsersService {
     let userMetadata = await this.db.userMetadata.findFirst({
       where: { userId },
     });
+    const status = await this.db.status.findFirst({
+      where: { code: 'ACTIVE' },
+    });
+    if (!status) {
+      throw new InternalServerErrorException();
+    }
 
     if (!userMetadata) {
       userMetadata = await this.db.userMetadata.create({
@@ -33,6 +54,7 @@ export class UsersService {
           views: 0,
           refreshToken,
           userId,
+          statusId: status.id,
         },
       });
     }
@@ -81,5 +103,46 @@ export class UsersService {
       where: { id: id },
       data,
     });
+  }
+
+  async createMarkForUser(args: {
+    id: number;
+    location: string;
+    timeZone: string;
+    durationCode: string;
+  }) {
+    const { durationCode, id, location, timeZone } = args;
+    let deadline = dayjs(Date.now());
+    const duration = await this.db.duration.findFirst({
+      where: { code: durationCode },
+    });
+    const durationValue = DURATION_MAP[duration.code];
+    if (!duration || !durationValue) {
+      throw new InternalServerErrorException();
+    }
+    const markedCard = await this.db.markedCard.findFirst({
+      where: { userId: id },
+    });
+
+    if (markedCard && dayjs(markedCard.deadLine).diff(Date.now()) > 0) {
+      deadline = dayjs(markedCard.deadLine).add(durationValue);
+    }
+
+    return this.db.markedCard.create({
+      data: {
+        userId: id,
+        location,
+        timeZone,
+        deadLine: deadline.format('YYYY-MM-DD hh:mm:ss.SSS'),
+      },
+    });
+  }
+  async isUserMarked(id: number) {
+    const markedUserCard = await this.db.markedCard.findFirst({
+      where: { userId: id },
+    });
+    if (!markedUserCard) return false;
+
+    return dayjs(markedUserCard.deadLine).diff(Date.now()) > 0;
   }
 }

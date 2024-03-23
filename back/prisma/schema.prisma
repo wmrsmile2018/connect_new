@@ -11,6 +11,14 @@ datasource db {
 }
 
 // Справочные таблицы
+
+model duration {
+  id         Int          @id @unique @default(autoincrement())
+  code       String       @unique
+  name       String
+  markedCard markedCard[]
+}
+
 model role {
   id          Int     @id @unique @default(autoincrement())
   title       String
@@ -20,11 +28,12 @@ model role {
 }
 
 model priority {
-  id          Int     @id @unique @default(autoincrement())
+  id          Int           @id @unique @default(autoincrement())
   title       String
   description String?
-  code        String  @unique
+  code        String        @unique
   user        user[]
+  UserHistory UserHistory[]
 }
 
 model linkType {
@@ -41,6 +50,16 @@ model filter {
   title       String
   description String?
   userFilter  userFilter[]
+}
+
+model status {
+  id                Int                 @id @unique @default(autoincrement())
+  code              String              @unique
+  description       String?
+  userAnnouncement  userAnnouncement[]
+  announcementPhoto announcementPhoto[]
+  userPhoto         userPhoto[]
+  userMetadata      userMetadata[]
 }
 
 // Таблицы фактов
@@ -88,6 +107,8 @@ model userAnnouncement {
   announcementId     Int
   user               user         @relation(fields: [userId], references: [id])
   userId             Int
+  status             status       @relation(fields: [statusId], references: [id])
+  statusId           Int
   dateTimeOfCreation DateTime     @default(now())
   timeZone           String
   location           String
@@ -97,6 +118,8 @@ model announcementPhoto {
   id                 Int          @id @default(autoincrement())
   announcement       announcement @relation(fields: [announcementId], references: [id])
   announcementId     Int
+  status             status       @relation(fields: [statusId], references: [id])
+  statusId           Int
   photo              photo        @relation(fields: [photoId], references: [id])
   photoId            Int          @unique
   dateTimeOfCreation DateTime     @default(now())
@@ -108,6 +131,8 @@ model userPhoto {
   id                 Int      @id @default(autoincrement())
   user               user     @relation(fields: [userId], references: [id])
   userId             Int
+  status             status   @relation(fields: [statusId], references: [id])
+  statusId           Int
   photo              photo    @relation(fields: [photoId], references: [id])
   photoId            Int      @unique
   dateTimeOfCreation DateTime @default(now())
@@ -116,14 +141,36 @@ model userPhoto {
 }
 
 model markedCard {
-  id                 Int      @id @unique @default(autoincrement())
-  user               user     @relation(fields: [userId], references: [id])
+  id                 Int       @id @unique @default(autoincrement())
+  user               user      @relation(fields: [userId], references: [id])
   userId             Int
-  deadline           DateTime
-  dateTimeOfCreation DateTime @default(now())
+  deadLine           DateTime
+  dateTimeOfCreation DateTime  @default(now())
   timeZone           String
   location           String
-  isMarked           Boolean
+  duration           duration? @relation(fields: [durationId], references: [id])
+  durationId         Int?
+}
+
+model UserHistory {
+  id             Int       @id @unique @default(autoincrement())
+  priority       priority? @relation(fields: [priorityCode], references: [code])
+  priorityCode   String
+  phone          String    @unique
+  avatar         Int?
+  timeZone       String?
+  location       String?
+  patronymic     String?
+  updateDateTime DateTime?
+  address        String?
+  longtitude     String?
+  jobTitle       String?
+  rating         Int?
+  firstName      String?
+  surname        String?
+  description    String?
+  latitude       String?
+  email          String?   @unique
 }
 
 // Таблицы сущностей
@@ -133,26 +180,25 @@ model user {
   roleCode           String
   priority           priority? @relation(fields: [priorityCode], references: [code])
   priorityCode       String
+  avatarId           String?
   code               Int
   hash               String
   salt               String
   phone              String    @unique
   dateTimeOfCreation DateTime  @default(now())
-
-  email          String?   @unique
-  firstName      String?
-  surname        String?
-  patronymic     String?
-  avatar         Int?
-  timeZone       String?
-  location       String?
-  updateDateTime DateTime?
-  address        String?
-  jobTitle       String?
-  rating         Int?
-  description    String?
-  latitude       String?
-  longtitude     String?
+  email              String?   @unique
+  firstName          String?
+  surname            String?
+  patronymic         String?
+  timeZone           String?
+  location           String?
+  updateDateTime     DateTime  @updatedAt
+  address            String?
+  jobTitle           String?
+  rating             Int?
+  description        String?
+  latitude           String?
+  longtitude         String?
 
   favoriteSrc      favorite[]         @relation("userSrc")
   favoriteTrg      favorite[]         @relation("userTrg")
@@ -168,6 +214,8 @@ model userMetadata {
   id                    Int      @id @unique @default(autoincrement())
   user                  user     @relation(fields: [userId], references: [id])
   userId                Int      @unique
+  status                status   @relation(fields: [statusId], references: [id])
+  statusId              Int
   views                 Int?
   refreshToken          String
   tokenCreationDateTime DateTime @updatedAt

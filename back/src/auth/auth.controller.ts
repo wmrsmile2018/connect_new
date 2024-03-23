@@ -11,7 +11,6 @@ import {
 import { ApiCreatedResponse, ApiOkResponse, ApiTags } from '@nestjs/swagger';
 import {
   CheckNumberBodyDto,
-  GetSessionInfoDto,
   RefreshTokenBodyDto,
   SignInBodyDto,
   SignUpBodyDto,
@@ -19,7 +18,6 @@ import {
 import { AuthService } from './auth.service';
 import { CookieService } from './cookie.service';
 import { AuthGuard } from './auth.guard';
-import { SessionInfo } from './sessionInfo.decorator';
 import { Response } from 'express';
 
 @ApiTags('auth')
@@ -53,10 +51,7 @@ export class AuthController {
     @Body() body: SignInBodyDto,
     @Res({ passthrough: true }) res: Response,
   ) {
-    const { accessToken, refreshToken } = await this.authService.signIn(
-      body.phone,
-      body.password,
-    );
+    const { accessToken, refreshToken } = await this.authService.signIn(body);
 
     this.cookieService.setToken(res, accessToken);
     return { accessToken, refreshToken };
@@ -70,15 +65,6 @@ export class AuthController {
     this.cookieService.removeToken(res);
   }
 
-  @Get('session')
-  @ApiOkResponse({
-    type: GetSessionInfoDto,
-  })
-  @UseGuards(AuthGuard)
-  getSessionInfo(@SessionInfo() session: GetSessionInfoDto) {
-    return session;
-  }
-
   @Post('refresh-token')
   @ApiOkResponse()
   async refreshToken(
@@ -86,10 +72,11 @@ export class AuthController {
     @Res({ passthrough: true })
     res: Response,
   ) {
-    const { accessToken, refreshToken } = await this.authService.refreshToken(
-      refreshTokenBodyDto.refreshToken,
-      refreshTokenBodyDto.userId,
-    );
+    const { accessToken, refreshToken } = await this.authService.refreshToken({
+      ...refreshTokenBodyDto,
+      oldRefreshToken: refreshTokenBodyDto.refreshToken,
+      userId: refreshTokenBodyDto.userId,
+    });
     this.cookieService.setToken(res, accessToken);
     return { accessToken, refreshToken };
   }

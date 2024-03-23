@@ -6,22 +6,18 @@ import { InjectS3, S3 } from 'nestjs-s3';
 export class AwsS3Service {
   constructor(@InjectS3() private readonly s3: S3) {}
 
-  async uploadFile(
-    id: string,
-    fileName: string,
-    file: Buffer,
-  ): Promise<boolean> {
+  async uploadFile(id: string, file: Buffer): Promise<boolean> {
     const res = await this.s3.send(
       new PutObjectCommand({
         Bucket: 'connect',
-        Key: fileName,
+        Key: id,
         Body: file,
       }),
     );
     return res.$metadata.httpStatusCode === HttpStatus.OK;
   }
 
-  async uploadPhotos(
+  async uploadFiles(
     files: Array<{ id: string; fileName: string; data: Buffer }>,
   ) {
     const fileNameFailure = [];
@@ -34,7 +30,7 @@ export class AwsS3Service {
         }),
       );
 
-      if (res.$metadata.httpStatusCode === HttpStatus.OK) {
+      if (res.$metadata.httpStatusCode !== HttpStatus.OK) {
         fileNameFailure.push(file.fileName);
       }
     });

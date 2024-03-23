@@ -5,18 +5,17 @@ import {
   Injectable,
   UnauthorizedException,
 } from '@nestjs/common';
-import { DbService } from 'src/db/db.service';
 import { PasswordService } from './password.service';
 import { UsersService } from 'src/users/users.service';
 import { SmsService } from 'src/sms/sms.service';
 import { JwtService } from '@nestjs/jwt';
 import { SEND_MESSAGE } from './constants';
 import * as dayjs from 'dayjs';
+import { GetSessionInfoDto } from 'src/session-info/dto';
 
 @Injectable()
 export class AuthService {
   constructor(
-    private readonly db: DbService,
     private readonly passwordService: PasswordService,
     private readonly smsService: SmsService,
     private readonly usersService: UsersService,
@@ -50,7 +49,13 @@ export class AuthService {
     return await this.usersService.setUserCredentials(phone, hash, salt);
   }
 
-  async signIn(phone: string, password: string) {
+  async signIn(args: {
+    phone: string;
+    password: string;
+    location: string;
+    timeZone: string;
+  }) {
+    const { password, phone, location, timeZone } = args;
     const user = await this.usersService.findByNumber(phone);
 
     if (!user) {
@@ -68,12 +73,20 @@ export class AuthService {
     const accessToken = await this.jwtService.signAsync({
       sub: user.id,
       phone: user.phone,
-    });
+      location,
+      timeZone,
+    } as GetSessionInfoDto);
 
     return { accessToken, refreshToken };
   }
 
-  async refreshToken(oldRefreshToken: string, userId: number) {
+  async refreshToken(args: {
+    oldRefreshToken: string;
+    userId: number;
+    location: string;
+    timeZone: string;
+  }) {
+    const { oldRefreshToken, userId, location, timeZone } = args;
     const dateNow = Date.now();
     const userMetadata = await this.usersService.getUserMetadataById(userId);
     const user = await this.usersService.findById(userId);
@@ -96,7 +109,9 @@ export class AuthService {
     const accessToken = await this.jwtService.signAsync({
       sub: user.id,
       phone: user.phone,
-    });
+      location,
+      timeZone,
+    } as GetSessionInfoDto);
 
     return { accessToken, refreshToken };
   }

@@ -13,21 +13,17 @@ export class AwsS3Controller {
   @Post('uplaod-file')
   @ApiFile('file', false)
   async uploadFile(@UploadedFile() file: Express.Multer.File) {
-    return await this.awsS3Service.uploadFile(
-      uuidv4(),
-      file.originalname,
-      file.buffer,
-    );
+    return await this.awsS3Service.uploadFile(uuidv4(), file.buffer);
   }
 
   @Post('uplaod-files')
-  @ApiFiles('photos', false)
+  @ApiFiles('files', false)
   async uploadPhotos(@UploadedFiles() files: Array<Express.Multer.File>) {
     const mappedFiles = files.map((file) => ({
       id: uuidv4(),
       fileName: file.originalname,
       data: file.buffer,
     }));
-    return await this.awsS3Service.uploadPhotos(mappedFiles);
+    return await this.awsS3Service.uploadFiles(mappedFiles);
   }
 }

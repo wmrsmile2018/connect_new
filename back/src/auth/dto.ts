@@ -46,19 +46,16 @@ export class SignInBodyDto {
   })
   @IsNotEmpty()
   password: string;
-}
 
-export class GetSessionInfoDto {
-  @ApiProperty()
-  id: number;
+  @ApiProperty({
+    example: 'asdasdad',
+  })
+  location: string;
 
-  @ApiProperty()
-  email: string;
-
-  @ApiProperty()
-  'iat': number;
-  @ApiProperty()
-  'exp': number;
+  @ApiProperty({
+    example: 'asdasdad',
+  })
+  timeZone: string;
 }
 
 export class RefreshTokenBodyDto {
@@ -71,4 +68,14 @@ export class RefreshTokenBodyDto {
     example: 'asdasdad',
   })
   refreshToken: string;
+
+  @ApiProperty({
+    example: 'asdasdad',
+  })
+  location: string;
+
+  @ApiProperty({
+    example: 'asdasdad',
+  })
+  timeZone: string;
 }

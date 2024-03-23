@@ -30,7 +30,7 @@ import { UsersModule } from 'src/users/users.module';
       // imports: [ConfigModule],
       useFactory: (configService: ConfigService) => ({
         secret: configService.get('JWT_SECRET'),
-        signOptions: { expiresIn: '7s' },
+        signOptions: { expiresIn: '1d' },
       }),
       inject: [ConfigService],
     }),

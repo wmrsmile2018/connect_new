@@ -13,8 +13,7 @@ import { DURATION_MAP } from './constants';
 export class UsersService {
   constructor(private readonly db: DbService) {
     // console.log(dayjs('day', undefined).add(1, 'd'));
-    console.log('asdasd', dayjs('2024-03-22 01:29:55.284').diff(Date.now()));
-    console.log('asdasd', dayjs(Date.now()).diff('2024-03-22 01:29:55.284'));
+    console.log('asdasd', new Date().toISOString());
   }
 
   async findById(id: number) {
@@ -112,7 +111,6 @@ export class UsersService {
     durationCode: string;
   }) {
     const { durationCode, id, location, timeZone } = args;
-    let deadline = dayjs(Date.now());
     const duration = await this.db.duration.findFirst({
       where: { code: durationCode },
     });
@@ -120,12 +118,15 @@ export class UsersService {
     if (!duration || !durationValue) {
       throw new InternalServerErrorException();
     }
-    const markedCard = await this.db.markedCard.findFirst({
-      where: { userId: id },
-    });
+    let deadline = dayjs(Date.now()).add(...durationValue);
+    const markedCard = (
+      await this.db.markedCard.findMany({
+        where: { userId: id },
+      })
+    ).at(-1);
 
     if (markedCard && dayjs(markedCard.deadLine).diff(Date.now()) > 0) {
-      deadline = dayjs(markedCard.deadLine).add(durationValue);
+      deadline = dayjs(markedCard.deadLine).add(...durationValue);
     }
 
     return this.db.markedCard.create({
@@ -133,14 +134,17 @@ export class UsersService {
         userId: id,
         location,
         timeZone,
-        deadLine: deadline.format('YYYY-MM-DD hh:mm:ss.SSS'),
+        deadLine: deadline.toISOString(),
       },
     });
   }
+
   async isUserMarked(id: number) {
-    const markedUserCard = await this.db.markedCard.findFirst({
-      where: { userId: id },
-    });
+    const markedUserCard = (
+      await this.db.markedCard.findMany({
+        where: { userId: id },
+      })
+    ).at(-1);
     if (!markedUserCard) return false;
 
     return dayjs(markedUserCard.deadLine).diff(Date.now()) > 0;

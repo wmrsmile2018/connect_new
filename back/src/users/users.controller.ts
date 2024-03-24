@@ -2,6 +2,7 @@ import {
   Body,
   Controller,
   Get,
+  NotFoundException,
   Param,
   Patch,
   Post,
@@ -44,13 +45,22 @@ export class UsersController {
   @ApiOkResponse()
   @ApiParam({ name: 'id', required: true, description: 'user identifier' })
   async getUserById(@Param('id') id: number) {
-    return await this.usersService.findById(id);
+    const user = await this.usersService.findById(id);
+    if (!user) {
+      throw new NotFoundException();
+    }
+    return user;
   }
+
   @Get('phone/:phone')
   @ApiOkResponse()
   @ApiParam({ name: 'phone', required: true, description: 'user phone' })
   async getUserByPhone(@Param('phone') phone: string) {
-    return await this.usersService.findByNumber(phone);
+    const user = await this.usersService.findByNumber(phone);
+    if (!user) {
+      throw new NotFoundException();
+    }
+    return user;
   }
 
   @Post('list')
@@ -71,7 +81,6 @@ export class UsersController {
     return await this.usersService.createMarkForUser({
       ...session,
       ...body,
-      id: session.sub,
     });
   }
 

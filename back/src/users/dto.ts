@@ -2,6 +2,10 @@ import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
 export class MarkUserBodyDto {
   @ApiProperty({
+    example: 1,
+  })
+  id: number;
+  @ApiProperty({
     example: '1d',
   })
   durationCode: string;

@@ -1,1 +1,2 @@
-insert into "markedCard" ("userId", deadline, "timeZone", location, "isMarked") values (2, '2024-03-02 03:21:37.594', 'timeZone', 'location', false);
+insert into "markedCard" ("userId", "deadLine", "timeZone", location ) values (1, '2024-03-02 03:21:37.594', 'timeZone', 'location');
+insert into "markedCard" ("userId", "deadLine", "timeZone", location ) values (1, '2024-03-24T03:57:11', 'timeZone', 'location');
